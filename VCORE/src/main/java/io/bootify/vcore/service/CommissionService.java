@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,17 +19,19 @@ import java.util.stream.Collectors;
 public class CommissionService {
 
     private final CommissionRepository commissionRepository;
+    private final JavaMailSender javaMailSender;
 
     // We can inject the site owner's email from application properties, 
     // or fallback to a default value if not set.
     @Value("${app.owner.email:owner@example.com}")
     private String ownerEmail;
 
-    @Value("${app.email.api-key:}")
+    @Value("${spring.email.api-key:}")
     private String emailApiKey;
 
-    public CommissionService(CommissionRepository commissionRepository) {
+    public CommissionService(CommissionRepository commissionRepository, JavaMailSender javaMailSender) {
         this.commissionRepository = commissionRepository;
+        this.javaMailSender = javaMailSender;
     }
 
     public String createCommission(CommissionRequestDTO dto) {
@@ -43,11 +47,17 @@ public class CommissionService {
 
         commissionRepository.save(entity);
 
-        sendEmailViaApi(ownerEmail, "New Art Commission Request!",
-                "You received a new commission request from " + dto.getSenderName() + "!");
+        String details = "Name: " + dto.getSenderName() + "\n" +
+                         "Email: " + dto.getSenderEmail() + "\n" +
+                         "Commission Type: " + dto.getCommissionType() + "\n" +
+                         "Art Style: " + dto.getArtstyleType() + "\n" +
+                         "Notes: " + (dto.getAdditionalNotes() != null ? dto.getAdditionalNotes().replace("\"", "\\\"") : "");
 
-        sendEmailViaApi(dto.getSenderEmail(), "Copy of your Art Commission Request",
-                "Hello " + dto.getSenderName() + ", thank you for your request!");
+        sendEmailViaApi(ownerEmail, "New Art Commission Request!",
+                "You received a new commission request from " + dto.getSenderName() + "!\n\nDetails:\n" + details);
+
+        sendEmailViaGmail(dto.getSenderEmail(), "Copy of your Art Commission Request",
+                "Hello " + dto.getSenderName() + ", thank you for your request!\n\nDetails:\n" + details);
 
         return "Commission submitted successfully!";
     }
@@ -77,10 +87,10 @@ public class CommissionService {
             headers.set("Authorization", "Bearer " + emailApiKey);
             headers.set("Content-Type", "application/json");
 
-            // Example JSON payload for an API like Resend (https://resend.com)
-            // Note: Most API providers require you to use a verified 'from' domain.
-            String jsonBody = String.format("{\"from\":\"onboarding@resend.dev\", \"to\":[\"%s\"], \"subject\":\"%s\", \"text\":\"%s\"}",
-                    to, subject, text);
+            String htmlText = text.replace("\n", "<br>");
+
+            String jsonBody = String.format("{\"from\":\"onboarding@resend.dev\", \"to\":[\"%s\"], \"subject\":\"%s\", \"html\":\"%s\"}",
+                    to, subject, htmlText);
 
             HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
             restTemplate.exchange("https://api.resend.com/emails", HttpMethod.POST, request, String.class);
@@ -88,6 +98,20 @@ public class CommissionService {
             System.out.println("Successfully sent email via API!");
         } catch (Exception e) {
             System.err.println("Could not send email via API: " + e.getMessage());
+        }
+    }
+
+    private void sendEmailViaGmail(String to, String subject, String text) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(ownerEmail);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            javaMailSender.send(message);
+            System.out.println("Successfully sent email via Gmail SMTP!");
+        } catch (Exception e) {
+            System.err.println("Could not send email via Gmail: " + e.getMessage());
         }
     }
 }

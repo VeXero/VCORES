@@ -15,7 +15,20 @@ spring:
 
   # Email Configuration (Requires an API Key from an email provider like Resend or SendGrid)
   email:
-    api-key: "re_doiYMn3b_3wJhp5s6BbfYhJWX3ppoiCh3"
+    api-key: "re_MqBeboYh_9nmqDxeovFheLBcdt5phcVoK"
+
+  # Gmail SMTP Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "vexcorespng@gmail.com"
+    password: "gzic jwgw yxvt wfos"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 app:
   owner:
