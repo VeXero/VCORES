@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/VCORE
+    username: postgres
+    password: 1234
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Email Configuration (Requires an API Key from an email provider like Resend or SendGrid)
+  email:
+    api-key: "re_doiYMn3b_3wJhp5s6BbfYhJWX3ppoiCh3"
+
+app:
+  owner:
+    email: vexcorespng@gmail.com
