@@ -7,10 +7,6 @@ import io.bootify.vcore.model.CommissionType;
 import io.bootify.vcore.repos.CommissionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +18,6 @@ import static org.mockito.Mockito.*;
 public class CommissionServiceTest {
 
     private CommissionRepository commissionRepository;
-    private JavaMailSender mailSender;
     private CommissionService commissionService;
 
     @BeforeEach
@@ -43,8 +38,6 @@ public class CommissionServiceTest {
         String result = commissionService.createCommission(dto);
 
         verify(commissionRepository, times(1)).save(any(CommissionRequest.class));
-
-
         assertEquals("Commission submitted successfully!", result);
     }
 
