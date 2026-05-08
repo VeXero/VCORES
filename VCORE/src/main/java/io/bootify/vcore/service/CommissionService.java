@@ -107,6 +107,11 @@ public class CommissionService {
     }
 
     private void sendEmailViaGmail(String to, String subject, String text) {
+        if (this.javaMailSender == null) {
+            // No JavaMailSender configured (e.g., in tests) - skip sending to avoid NPE and noisy logs
+            System.err.println("Skipping Gmail SMTP send - no JavaMailSender configured.");
+            return;
+        }
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(ownerEmail);
