@@ -29,6 +29,11 @@ public class CommissionService {
     @Value("${spring.email.api-key:}")
     private String emailApiKey;
 
+    public CommissionService(CommissionRepository commissionRepository) {
+        this(commissionRepository, null);
+    }
+
+    // Backwards-compatible constructor used by older tests or callers that provide a JavaMailSender
     public CommissionService(CommissionRepository commissionRepository, JavaMailSender javaMailSender) {
         this.commissionRepository = commissionRepository;
         this.javaMailSender = javaMailSender;
