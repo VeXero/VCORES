@@ -15,6 +15,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,5 +76,42 @@ public class CommissionServiceTest {
         assertEquals("User", result.get(0).getSenderName());
         assertEquals(CommissionType.HEADSHOT, result.get(0).getCommissionType());
         assertEquals(ArtstyleType.SKETCH, result.get(0).getArtstyleType());
+    }
+
+    @Test
+    public void testGetAllCommissionsWithPageable() {
+        CommissionRequest e1 = new CommissionRequest("A", "a@e.com", CommissionType.HEADSHOT, ArtstyleType.SKETCH, "n");
+        e1.setId(5L);
+        List<CommissionRequest> list = Collections.singletonList(e1);
+        Pageable pageable = PageRequest.of(0, 10);
+        when(commissionRepository.findAll(pageable)).thenReturn(new PageImpl<>(list, pageable, 1));
+
+        var page = commissionService.getAllCommissions(pageable);
+
+        assertEquals(1, page.getTotalElements());
+        assertEquals(1, page.getContent().size());
+        assertEquals(5L, page.getContent().get(0).getId());
+    }
+
+    @Test
+    public void testGetCommissionFound() {
+        CommissionRequest entity = new CommissionRequest("Found", "f@e.com", CommissionType.HALFBODY, ArtstyleType.SKETCH, "ok");
+        entity.setId(42L);
+        when(commissionRepository.findById(42L)).thenReturn(Optional.of(entity));
+
+        CommissionRequestDTO dto = commissionService.getCommission(42L);
+
+        assertEquals(42L, dto.getId());
+        assertEquals("Found", dto.getSenderName());
+        assertEquals(CommissionType.HALFBODY, dto.getCommissionType());
+    }
+
+    @Test
+    public void testGetCommissionNotFound() {
+        when(commissionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(io.bootify.vcore.rest.ResourceNotFoundException.class, () -> {
+            commissionService.getCommission(99L);
+        });
     }
 }
