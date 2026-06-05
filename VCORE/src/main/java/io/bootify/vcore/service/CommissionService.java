@@ -29,6 +29,11 @@ public class CommissionService {
     @Value("${spring.email.api-key:}")
     private String emailApiKey;
 
+    public CommissionService(CommissionRepository commissionRepository) {
+        this(commissionRepository, null);
+    }
+
+    // Backwards-compatible constructor used by older tests or callers that provide a JavaMailSender
     public CommissionService(CommissionRepository commissionRepository, JavaMailSender javaMailSender) {
         this.commissionRepository = commissionRepository;
         this.javaMailSender = javaMailSender;
@@ -102,6 +107,11 @@ public class CommissionService {
     }
 
     private void sendEmailViaGmail(String to, String subject, String text) {
+        if (this.javaMailSender == null) {
+            // No JavaMailSender configured (e.g., in tests) - skip sending to avoid NPE and noisy logs
+            System.err.println("Skipping Gmail SMTP send - no JavaMailSender configured.");
+            return;
+        }
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(ownerEmail);
