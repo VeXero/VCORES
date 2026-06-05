@@ -28,7 +28,8 @@ public class CommissionServiceTest {
     @BeforeEach
     public void setup() {
         commissionRepository = mock(CommissionRepository.class);
-        commissionService = new CommissionService(commissionRepository);
+        mailSender = mock(JavaMailSender.class);
+        commissionService = new CommissionService(commissionRepository, mailSender);
     }
 
     @Test
