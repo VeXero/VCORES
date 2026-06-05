@@ -7,6 +7,11 @@ import io.bootify.vcore.model.CommissionType;
 import io.bootify.vcore.repos.CommissionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,13 +23,16 @@ import static org.mockito.Mockito.*;
 public class CommissionServiceTest {
 
     private CommissionRepository commissionRepository;
+    private JavaMailSender mailSender;
+    private SimpMessagingTemplate messagingTemplate;
     private CommissionService commissionService;
 
     @BeforeEach
     public void setup() {
         commissionRepository = mock(CommissionRepository.class);
         mailSender = mock(JavaMailSender.class);
-        commissionService = new CommissionService(commissionRepository, mailSender);
+        messagingTemplate = mock(SimpMessagingTemplate.class);
+        commissionService = new CommissionService(commissionRepository, mailSender, messagingTemplate);
     }
 
     @Test
@@ -36,10 +44,19 @@ public class CommissionServiceTest {
         dto.setArtstyleType(ArtstyleType.SKETCH);
         dto.setAdditionalNotes("Test notes");
 
-        String result = commissionService.createCommission(dto);
+        when(commissionRepository.save(any(CommissionRequest.class))).thenAnswer(inv -> {
+            CommissionRequest arg = inv.getArgument(0);
+            arg.setId(1L);
+            return arg;
+        });
+
+        CommissionRequestDTO result = commissionService.createCommission(dto);
 
         verify(commissionRepository, times(1)).save(any(CommissionRequest.class));
-        assertEquals("Commission submitted successfully!", result);
+        verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/commissions"), any(CommissionRequestDTO.class));
+
+        assertEquals("Test User", result.getSenderName());
+        assertEquals(1L, result.getId());
     }
 
     @Test
