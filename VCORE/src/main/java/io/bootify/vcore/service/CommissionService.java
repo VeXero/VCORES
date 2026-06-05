@@ -132,6 +132,7 @@ public class CommissionService {
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
+
     public CommissionRequestDTO getCommission(Long id) {
         var entity = commissionRepository.findById(id).orElseThrow(() -> new io.bootify.vcore.rest.ResourceNotFoundException("Commission not found"));
         CommissionRequestDTO dto = new CommissionRequestDTO();
