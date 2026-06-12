@@ -21,6 +21,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Build backend before Sonar analysis
+        working-directory: VCORE
+        run: mvn -B clean package
+
       - name: Analyze with SonarCloud
         uses: SonarSource/sonarcloud-github-action@v2
         env:
@@ -32,3 +43,4 @@ jobs:
             -Dsonar.organization=vexero
             -Dsonar.sources=VCORE/src/main/java,vcore-frontend
             -Dsonar.tests=VCORE/src/test/java
+            -Dsonar.java.binaries=VCORE/target/classes
