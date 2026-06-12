@@ -114,4 +114,13 @@ public class CommissionServiceTest {
             commissionService.getCommission(99L);
         });
     }
+        @Test
+        public void testGetCommissionNotFound() {
+            when(commissionRepository.findById(88L)).thenReturn(Optional.empty());
+    
+            Assertions.assertThrows(io.bootify.vcore.rest.ResourceNotFoundException.class, () -> {
+                commissionService.getCommission(88L);
+            });
+        }
+    
 }
