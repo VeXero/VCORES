@@ -1,0 +1,12 @@
+io\bootify\vcore\VcoreApplication.class
+io\bootify\vcore\model\ArtstyleType.class
+io\bootify\vcore\model\CommissionRequestDTO.class
+io\bootify\vcore\config\CorsConfig.class
+io\bootify\vcore\model\CommissionType.class
+io\bootify\vcore\rest\CommissionController.class
+io\bootify\vcore\domain\CommissionRequest.class
+io\bootify\vcore\config\DomainConfig.class
+io\bootify\vcore\config\CorsConfig$1.class
+io\bootify\vcore\repos\CommissionRepository.class
+io\bootify\vcore\service\CommissionService.class
+io\bootify\vcore\rest\HomeResource.class
