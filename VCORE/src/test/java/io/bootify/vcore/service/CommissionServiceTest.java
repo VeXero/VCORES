@@ -115,7 +115,7 @@ public class CommissionServiceTest {
         });
     }
         @Test
-        public void testGetCommissionNotFound() {
+        public void testGetCommissionNotFound2() {
             when(commissionRepository.findById(88L)).thenReturn(Optional.empty());
     
             Assertions.assertThrows(io.bootify.vcore.rest.ResourceNotFoundException.class, () -> {
@@ -124,7 +124,7 @@ public class CommissionServiceTest {
         }
     
             @Test
-            public void testGetCommissionNotFound() {
+            public void testGetCommissionNotFound3() {
                 when(commissionRepository.findById(67L)).thenReturn(Optional.empty());
         
                 Assertions.assertThrows(io.bootify.vcore.rest.ResourceNotFoundException.class, () -> {
