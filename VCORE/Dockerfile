@@ -1,29 +1,23 @@
-name: Docker Build
+FROM eclipse-temurin:21 AS builder
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+WORKDIR /build
 
-jobs:
-  docker-build:
-    runs-on: ubuntu-latest
+COPY pom.xml mvnw mvnw.cmd ./
+COPY .mvn ./.mvn
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+RUN sed -i 's/\r$//' mvnw
+RUN ./mvnw dependency:resolve
 
-      - name: Build backend Docker image
-        run: docker build -f VCORE/Dockerfile -t vcore-backend ./VCORE
+COPY src ./src
 
-      - name: Run backend Docker container
-        run: |
-          docker run -d --name vcore-backend -p 8080:8080 vcore-backend
-          sleep 20
-          docker logs vcore-backend
+RUN ./mvnw clean package -DskipTests
 
-      - name: Stop backend Docker container
-        if: always()
-        run: docker rm -f vcore-backend || true
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY --from=builder /build/target/VCORE-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
