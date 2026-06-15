@@ -38,5 +38,14 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ../vcore-frontend
+    container_name: vcore-front
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+
 volumes:
   pgdata:
