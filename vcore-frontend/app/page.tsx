@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 
+type Notification = {
+	id: number;
+	message: string;
+};
+
 const portfolioPlaceholders = [
 	{
 		id: 1,
@@ -92,7 +97,21 @@ export default function Home() {
 	const [artstyleType, setArtstyleType] = useState("Sketch");
 	const [additionalNotes, setAdditionalNotes] = useState("");
 	const [status, setStatus] = useState("");
+	const [notifications, setNotifications] = useState<Notification[]>([]);
 
+	function addNotification(message: string) {
+		const id = Date.now();
+
+		setNotifications((prev) => [
+			...prev,
+			{ id, message },
+		]);
+
+		setTimeout(() => {
+			setNotifications((prev) => prev.filter((n) => n.id !== id));
+		}, 5000);
+	}
+	
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setStatus("Sending...");
@@ -110,6 +129,7 @@ export default function Home() {
 			});
 			if (response.ok) {
 				setStatus("Commission sent successfully! Thank you!");
+				addNotification("New commission request sent!");
 				setSenderName("");
 				setSenderEmail("");
 				setCommissionType("HEADSHOT");
@@ -134,6 +154,30 @@ export default function Home() {
 
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
+			<div className="notification-container">
+				{notifications.map((notification) => (
+					<div key={notification.id} className="window notification-window">
+						<div className="title-bar">
+							<div className="title-bar-text">Notification</div>
+							<div className="title-bar-controls">
+								<button
+									aria-label="Close"
+									onClick={() =>
+										setNotifications((prev) =>
+											prev.filter((n) => n.id !== notification.id)
+										)
+									}
+								/>
+							</div>
+						</div>
+
+						<div className="window-body">
+							<p>{notification.message}</p>
+						</div>
+					</div>
+				))}
+			</div>
+
 			{/* Welcome Section */}
 			<section className="rounded-xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
 				<p className="mb-2 text-sm uppercase tracking-[0.2em] text-zinc-500">
