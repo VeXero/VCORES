@@ -15,14 +15,14 @@ spring:
 
   # Email Configuration (Requires an API Key from an email provider like Resend or SendGrid)
   email:
-    api-key: "re_MqBeboYh_9nmqDxeovFheLBcdt5phcVoK"
+    api-key: "re_Mx4h6suc_DoYGNgtGzPCcMj9SqQQT3v5r"
 
   # Gmail SMTP Configuration
   mail:
     host: smtp.gmail.com
     port: 587
     username: "vexcorespng@gmail.com"
-    password: "gzic jwgw yxvt wfos"
+    password: "upef krmp vpbo xotj"
     properties:
       mail:
         smtp:

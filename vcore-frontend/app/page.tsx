@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 type Notification = {
 	id: number;
@@ -111,6 +113,35 @@ export default function Home() {
 			setNotifications((prev) => prev.filter((n) => n.id !== id));
 		}, 5000);
 	}
+
+	useEffect(() => {
+		const client = new Client({
+			webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
+			reconnectDelay: 5000,
+
+			onConnect: () => {
+				console.log("Connected to WebSocket");
+
+				client.subscribe("/topic/commissions", (message) => {
+					const commission = JSON.parse(message.body);
+
+					addNotification(
+						`New commission received from ${commission.senderName ?? "someone"}!`
+					);
+				});
+			},
+
+			onStompError: (frame) => {
+				console.error("WebSocket error:", frame);
+			},
+		});
+
+		client.activate();
+
+		return () => {
+			client.deactivate();
+		};
+	}, []);
 	
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -129,7 +160,7 @@ export default function Home() {
 			});
 			if (response.ok) {
 				setStatus("Commission sent successfully! Thank you!");
-				addNotification("New commission request sent!");
+				// addNotification("New commission request sent!");
 				setSenderName("");
 				setSenderEmail("");
 				setCommissionType("HEADSHOT");
